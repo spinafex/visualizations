@@ -1,0 +1,28 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Number of iterations and initial x value
+num_iterations = 1000
+num_last = 100  # Number of points to plot after transient behavior stabilizes
+r_values = np.linspace(2.5, 4.0, 10000)  # Range of r values
+
+x = 1e-5 * np.ones(len(r_values))  # Start with small x for all r values
+
+# Initialize figure
+plt.figure(figsize=(12, 8))
+
+# Iterate the logistic map
+for i in range(num_iterations):
+    x = r_values * x * (1 - x)  # Logistic map equation
+    # Plot only the final points to capture stable orbits
+    if i >= (num_iterations - num_last):
+        plt.plot(r_values, x, ',k', alpha=0.25)  # Plotting in black with low opacity for density effect
+
+# Labels and title
+plt.title("Bifurcation Diagram of the Logistic Map", fontsize=16)
+plt.xlabel("Growth Parameter (r)", fontsize=14)
+plt.ylabel("Population (x)", fontsize=14)
+plt.grid(False)
+
+# Display the plot
+plt.show()
