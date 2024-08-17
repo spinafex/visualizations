@@ -1,0 +1,58 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from scipy.stats import gaussian_kde
+
+# Function to estimate the invariant density
+def estimate_invariant_density(data):
+    density = gaussian_kde(data)
+    return density
+
+# Function to calculate the spread of fast fluctuations
+def calculate_fluctuation_spread(data):
+    return np.std(data)
+
+# Function to calculate RAD
+def calculate_rad(time_series):
+    # Estimate the invariant density
+    density = estimate_invariant_density(time_series)
+    
+    # Create an array of values for density evaluation
+    x_values = np.linspace(min(time_series), max(time_series), 1000)
+    density_values = density(x_values)
+    
+    # Calculate the spread of fast fluctuations
+    spread = calculate_fluctuation_spread(time_series)
+    
+    # Rescale the density values
+    rad = density_values / spread if spread != 0 else density_values
+    return rad, x_values
+
+# Load financial time series data
+# Replace 'your_data.csv' with your actual data file
+data = pd.read_csv('stock_prices.csv')
+time_series = data['WMT'].values  # Assuming the price data is in a column named 'Price'
+
+# Calculate RAD
+rad, x_values = calculate_rad(time_series)
+
+# Plot the results
+plt.figure(figsize=(12, 6))
+plt.plot(x_values, rad, label='Rescaled Autodensity (RAD)', color='blue')
+
+# Calculate the threshold
+threshold = np.mean(rad) + 2 * np.std(rad)
+plt.axhline(y=threshold, color='red', linestyle='--', label='Threshold')
+
+plt.xlabel('Price')
+plt.ylabel('RAD Value')
+plt.title('Rescaled Autodensity (RAD)')
+plt.legend()
+plt.grid()
+plt.show()
+
+# Analyze results to determine proximity to regime change
+if np.any(rad > threshold):
+    print("Warning: Proximity to regime change detected based on RAD.")
+else:
+    print("No imminent regime change detected.")
